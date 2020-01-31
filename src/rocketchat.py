@@ -187,10 +187,11 @@ class Rocketchat(kp.Plugin):
                     with open(os.path.join(cache_path,i), "r") as users_file:
                         data = json.loads(users_file.read())
                         for item in data['users']:
-                            self.dbg('cusers:' ,item['name']) 
+                            unique_name = Rocketchat.get_unique_name(item)
+                            self.dbg('cusers:', unique_name)
                             suggestion = self.create_item(
                                 category=self.ITEMCAT,
-                                label=item['name'],
+                                label=unique_name,
                                 short_desc="direct",
                                 target=item['username'],
                                 args_hint=kp.ItemArgsHint.REQUIRED,
@@ -216,6 +217,14 @@ class Rocketchat(kp.Plugin):
                     self.users.append(suggestion)        
         self.dbg('Length:' , len(self.users) )
         return self.users
+
+    def get_unique_name(item):
+        name = item.get('name')
+        username = item.get('username')
+        label = username  # username is always set, for name that is not the case
+        if name:
+            label = name + " (" + username + ")"  # the name itself is not unique
+        return label
 
     def get_cache_path(self,prefix):
         cache_path = self.get_package_cache_path(True)
